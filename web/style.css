@@ -3,10 +3,9 @@
   padding: 0;
 }
 
-.name {
+.text {
   width: 200px;
   line-height: 28px;
-  margin: -140px 0 0 -100px;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -14,12 +13,20 @@
   text-align: center;
   color: #006567;
 }
+.name {
+  margin: -140px 0 0 -100px;
+}
+.info {
+  margin: 140px 0 0 -100px;
+}
 
 .profile {
   width: 57px;
   height: 57px;
   border-radius: 57px;
   position: absolute;
+  top: 50%;
+  left: 50%;
   margin: -27px 0 0 -27px;
   overflow: hidden;
   /*border: 1px solid #006567;*/
@@ -35,8 +42,6 @@
   height: 140px;
   border-radius: 140px;
   margin: -70px 0 0 -70px;
-  top: 50%;
-  left: 50%;
   opacity: 1;
 }
 .profile.me img {

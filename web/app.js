@@ -36,7 +36,8 @@ App = (function() {
     },
 
     bindEvents: function () {
-      var $name = $( ".name" );
+      var $name = $( ".name" ),
+        $info = $( ".info" );
 
       $( "body" ).delegate( ".profile:not(.me):not(.locked)", "mouseover", function () {
         var $profile = $( this ),
@@ -64,6 +65,7 @@ App = (function() {
 
         App.active = data.id;
         $name.text( data.display_name );
+        $info.text ( shares.length + " shared contacts" );
 
         $( ".profile:not(.me)" ).removeClass( "active locked chosen" );
         $profile.addClass( "active locked chosen" );
@@ -78,6 +80,7 @@ App = (function() {
       $( document ).on( "click", function () {
         $( ".profile:not(.me)" ).removeClass( "active locked chosen" );
         $name.text( "" );
+        $info.text( "" );
         this.active = false;
       } );
     },
@@ -87,13 +90,7 @@ App = (function() {
         distance = 200 + ( 2 * total ),
         circle = Math.PI,
         angleSegments = 2 / total,
-        angle = 0,
-        $me, offset, centerLeft, centerTop;
-
-      $me = $( ".profile.me" );
-      offset = $me.offset();
-      centerLeft = offset.left + ( $me.width() / 2 );
-      centerTop = offset.top + ( $me.height() / 2 );
+        angle = 0;
 
       for ( var i = 0; i < total; i++ ) {
         var share = this.shares[ i ],
@@ -106,8 +103,11 @@ App = (function() {
         } );
 
         $profile.attr( "data-id", share.id );
-        $profile.css( "left", ( centerLeft + left ) );
-        $profile.css( "top", ( centerTop + top ) );
+        $profile.animate( {
+          left: "+=" + left,
+          top: "+=" + top
+        }, 800, "swing" );
+
         angle += angleSegments;
       }
     },
