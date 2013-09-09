@@ -13,6 +13,7 @@ App = (function() {
     userID: "16184731_41d6ee",
     data: {},
     shares: [],
+    active: false,
 
     init: function () {
       $.getJSON(
@@ -27,7 +28,7 @@ App = (function() {
       this._addContact( {
         name: this.data.me.display_name,
         image: this.data.me.photo_urls.large
-      }, "me active" );
+      }, "me" );
 
       this._collectShares();
       this.circle();
@@ -37,18 +38,48 @@ App = (function() {
     bindEvents: function () {
       var $name = $( ".name" );
 
-      $( "body" ).delegate( ".profile:not(.me)", "mouseover", function () {
+      $( "body" ).delegate( ".profile:not(.me):not(.locked)", "mouseover", function () {
         var $profile = $( this ),
           data = $profile.data( "profile" );
 
         $profile.addClass( "active" );
-        $name.text( data.name );
+
+        if ( !App.active ) {
+          $name.text( data.display_name );
+        }
       });
 
-      $( "body" ).delegate( ".profile:not(.me)", "mouseout", function () {
+      $( "body" ).delegate( ".profile:not(.me):not(.locked)", "mouseout", function () {
         $( this ).removeClass( "active" );
-        $name.text( "" );
+
+        if ( !App.active ) {
+          $name.text( "" );
+        }
       });
+
+      $( "body" ).delegate( ".profile:not(.me)", "click", function ( event ) {
+        var $profile = $( this ),
+          data = $profile.data( "profile" ),
+          shares = data.shares;
+
+        App.active = data.id;
+        $name.text( data.display_name );
+
+        $( ".profile:not(.me)" ).removeClass( "active locked chosen" );
+        $profile.addClass( "active locked chosen" );
+
+        shares.forEach( function( id ) {
+          $( ".profile[data-id=" + id + "]" ).addClass( "active locked" );
+        } );
+
+        event.stopPropagation();
+      });
+
+      $( document ).on( "click", function () {
+        $( ".profile:not(.me)" ).removeClass( "active locked chosen" );
+        $name.text( "" );
+        this.active = false;
+      } );
     },
 
     circle: function () {
@@ -66,10 +97,15 @@ App = (function() {
 
       for ( var i = 0; i < total; i++ ) {
         var share = this.shares[ i ],
-          $profile = this._addContact( share, "contact" ),
           left = ~~( Math.sin( angle * circle ) * distance ),
           top = ~~( Math.cos( angle * circle ) * distance );
 
+        $profile = this._addContact( share, "contact", {
+          angleLeft: left,
+          angleTop: top
+        } );
+
+        $profile.attr( "data-id", share.id );
         $profile.css( "left", ( centerLeft + left ) );
         $profile.css( "top", ( centerTop + top ) );
         angle += angleSegments;
@@ -82,11 +118,9 @@ App = (function() {
           profile = this._getProfile( id ),
           result;
 
-        result = {
-          name: profile.display_name,
-          shares: sharedIDs,
-          image: profile.photo_urls.medium_thumb
-        };
+        result = $.extend( true, {}, profile );
+        result.image = profile.photo_urls.medium_thumb;
+        result.shares = sharedIDs;
 
         this.shares.push( result );
       }
@@ -100,13 +134,13 @@ App = (function() {
       data = ( typeof data === "undefined" ) ? {} : data;
 
       var $node = $( "<div class='profile'></div>" ),
-        $img = $( "<img>" ).attr( "src", profile.image ).attr( "alt", profile.name );
+        $img = $( "<img>" ).attr( "src", profile.image ).attr( "alt", profile.display_name );
 
       $node.addClass( styles );
       $node.data( "profile", profile );
 
       for ( var key in data ) {
-        $node( key, data[ key ] );
+        $node.data( key, data[ key ] );
       }
 
       $node.html( $img );

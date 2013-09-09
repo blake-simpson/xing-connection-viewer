@@ -24,7 +24,7 @@
   overflow: hidden;
   /*border: 1px solid #006567;*/
   box-shadow: 0 0 8px 1px rgba(0, 101 , 103, 0.7);
-  opacity: 0.7;
+  opacity: 0.3;
 }
 .profile img {
     max-width: 57px;
@@ -37,6 +37,7 @@
   margin: -70px 0 0 -70px;
   top: 50%;
   left: 50%;
+  opacity: 1;
 }
 .profile.me img {
   max-width: 140px;
@@ -44,6 +45,9 @@
 
 .profile.active {
   opacity: 1;
+}
+.profile.chosen {
+  box-shadow: 0 0 8px 1px rgba(200, 50, 0, 0.7)!important;
 }
 
 .profile.contact:hover {
