@@ -1,0 +1,40 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+.profile {
+  width: 57px;
+  height: 57px;
+  border-radius: 57px;
+  position: absolute;
+  margin: -27px 0 0 -27px;
+  overflow: hidden;
+  /*border: 1px solid #006567;*/
+  box-shadow: 0 0 8px 1px rgba(0, 101 , 103, 0.7);
+  opacity: 0.7;
+}
+.profile img {
+    max-width: 57px;
+}
+
+.profile.me {
+  width: 140px;
+  height: 140px;
+  border-radius: 140px;
+  margin: -70px 0 0 -70px;
+  top: 50%;
+  left: 50%;
+}
+.profile.me img {
+  max-width: 140px;
+}
+
+.profile.active {
+  opacity: 1;
+}
+
+.profile.contact:hover {
+  cursor: pointer;
+  box-shadow: 0 0 8px 1px rgba(0, 101 , 103, 1);
+}
