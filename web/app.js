@@ -37,14 +37,16 @@ App = (function() {
     bindEvents: function () {
       var $name = $( ".name" );
 
-      $( "body" ).delegate( ".profile", "mouseover", function () {
+      $( "body" ).delegate( ".profile:not(.me)", "mouseover", function () {
         var $profile = $( this ),
           data = $profile.data( "profile" );
 
+        $profile.addClass( "active" );
         $name.text( data.name );
       });
 
-      $( "body" ).delegate( ".profile", "mouseout", function () {
+      $( "body" ).delegate( ".profile:not(.me)", "mouseout", function () {
+        $( this ).removeClass( "active" );
         $name.text( "" );
       });
     },
