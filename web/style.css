@@ -3,6 +3,18 @@
   padding: 0;
 }
 
+.name {
+  width: 200px;
+  line-height: 28px;
+  margin: -140px 0 0 -100px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font: 14px Arial, sans-serif;
+  text-align: center;
+  color: #006567;
+}
+
 .profile {
   width: 57px;
   height: 57px;

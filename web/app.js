@@ -24,17 +24,34 @@ App = (function() {
     applyData: function ( json ) {
       this.data = json;
 
-      var $me = this._addContact( {
+      this._addContact( {
         name: this.data.me.display_name,
         image: this.data.me.photo_urls.large
       }, "me active" );
 
       this._collectShares();
+      this.circle();
+      this.bindEvents();
+    },
+
+    bindEvents: function () {
+      var $name = $( ".name" );
+
+      $( "body" ).delegate( ".profile", "mouseover", function () {
+        var $profile = $( this ),
+          data = $profile.data( "profile" );
+
+        $name.text( data.name );
+      });
+
+      $( "body" ).delegate( ".profile", "mouseout", function () {
+        $name.text( "" );
+      });
     },
 
     circle: function () {
       var total = this.shares.length,
-        distance = 10 * total,
+        distance = 200 + ( 2 * total ),
         circle = Math.PI,
         angleSegments = 2 / total,
         angle = 0,
@@ -75,13 +92,20 @@ App = (function() {
       this.shares = this.shares.sort( function( a, b ) {
         return a.shares.lenth > b.shares.length ? +1 : -1;
       } );
-
-      this.circle();
     },
 
-    _addContact: function ( profile, styles ) {
-      var $node = $( "<div class='profile'></div>" ).addClass( styles ),
+    _addContact: function ( profile, styles, data ) {
+      data = ( typeof data === "undefined" ) ? {} : data;
+
+      var $node = $( "<div class='profile'></div>" ),
         $img = $( "<img>" ).attr( "src", profile.image ).attr( "alt", profile.name );
+
+      $node.addClass( styles );
+      $node.data( "profile", profile );
+
+      for ( var key in data ) {
+        $node( key, data[ key ] );
+      }
 
       $node.html( $img );
       $( "body" ).append( $node );
