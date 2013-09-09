@@ -6,7 +6,7 @@ require 'oauth'
 module Xing
   module User
     def get_me
-      request_json("v1/users/me")
+      request_json("v1/users/me")["users"].first
     end
 
     def contact_ids

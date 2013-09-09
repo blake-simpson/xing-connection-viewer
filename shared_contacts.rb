@@ -1,40 +1,60 @@
+require 'json'
+
 class SharedContacts
   def initialize
     @connection = Xing::Api.new( KEY, SECRET )
     @connection.authorize
+
     @profile_cache = {}
+    @data = {}
+    @shares = {}
   end
 
   def collect_data
-    puts "\nSHARED CONTACT INFORMATION:\n\n"
+    puts "Collecting shared contact information... (This will take a while)\n\n"
+
+    @data["crawl_time"] = Time.now
+    @data["me"] = @connection.get_me
 
     @connection.contact_ids["items"].each do |id|
+      @shares[id] = []
       profile = @connection.profile(id)
       cache_add(profile)
 
-      shared = @connection.get_shared(profile["id"])
+      shared = @connection.get_shared(id)
       next unless shared && shared["users"].length
-
-      puts "Shared users with #{get_profile_name(profile)}:"
 
       shared["users"].each do |item|
         shared_id = item["id"]
         shared_profile = cache_get(shared_id)
+
+        @shares[id] << shared_id
 
         unless shared_profile
           shared_profile = @connection.profile(shared_id)
           cache_add(shared_profile)
           sleep 2
         end
-
-        puts get_profile_name(shared_profile)
       end
 
-      puts "\n\n"
+      puts "#{@shares[id].length} shares detected with #{get_profile_name(profile)}\n"
     end
+
+    @data["profiles"] = @profile_cache
+    @data["shares"] = @shares
+
+    save_data
   end
 
   private
+
+  def save_data
+    filename = "data/shares_#{ @data["me"]["id"] }.json"
+    puts "Saving data to #{filename}"
+    File.open(filename, "w") do |file|
+      file.puts JSON.generate(@data)
+    end
+  end
 
   def get_profile_name(data)
       data["display_name"] || "Unknown"
