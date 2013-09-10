@@ -17,7 +17,7 @@ class SharedContacts
     @data["me"] = @connection.get_me
 
     @connection.contact_ids["items"].each do |id|
-      @shares[id] = []
+      setup_shares_for(id)
       profile = @connection.profile(id)
       cache_add(profile)
 
@@ -28,7 +28,7 @@ class SharedContacts
         shared_id = item["id"]
         shared_profile = cache_get(shared_id)
 
-        @shares[id] << shared_id
+        add_shared(id, shared_id)
 
         unless shared_profile
           shared_profile = @connection.profile(shared_id)
@@ -54,6 +54,20 @@ class SharedContacts
     File.open(filename, "w") do |file|
       file.puts JSON.generate(@data)
     end
+  end
+
+  def setup_shares_for(id)
+    @shares[id] ||= []
+  end
+
+  def add_shared(owner_id, shared_id)
+    # Ensure both users have a share array
+    setup_shares_for(owner_id)
+    setup_shares_for(shared_id)
+
+    # Add the relationship to each user, unless it's already been cached
+    @shares[owner_id]  << shared_id unless @shares[owner_id].include? shared_id
+    @shares[shared_id] << owner_id  unless @shares[shared_id].include? owner_id
   end
 
   def get_profile_name(data)
