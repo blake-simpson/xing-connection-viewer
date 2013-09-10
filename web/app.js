@@ -142,13 +142,22 @@ App = (function() {
         } );
 
         $profile.attr( "data-id", share.id );
-        $profile.animate( {
-          left: "+=" + left,
-          top: "+=" + top
-        }, 800, "swing" );
-
         angle += angleSegments;
       }
+
+      this.animate();
+    },
+
+    // Animate all profile segments together
+    animate: function () {
+      $( ".profile:not(.me)" ).each( function() {
+        var $profile = $( this );
+
+        $profile.animate( {
+          left: "+=" + $profile.data( "angleLeft" ),
+          top: "+=" + $profile.data( "angleTop" )
+        }, 800, "swing" );
+      } );
     },
 
     /**
@@ -168,8 +177,7 @@ App = (function() {
       }
 
       this.shares = this.shares.sort( function( a, b ) {
-        //return a.shares.lenth > b.shares.length ? +1 : -1;
-        return a.shares.name > a.shares.name ? +1 : -1;
+        return a.shares.lenth > b.shares.length ? +1 : -1;
       } );
     },
 
@@ -182,6 +190,15 @@ App = (function() {
       var $node = $( "<div class='profile'></div>" ),
         $img = $( "<img>" ).attr( "src", profile.image ).attr( "alt", profile.display_name );
 
+      // Setup callback to fix image height
+      $img.on( "load", function () {
+        var $img = $( this ),
+          $profile = $img.parent();
+
+        $img.css( "margin-top", -( $img.height() - $profile.height() ) / 2 );
+      } );
+
+
       $node.addClass( styles );
       $node.data( "profile", profile );
 
@@ -191,6 +208,7 @@ App = (function() {
 
       $node.html( $img );
       $( "body" ).append( $node );
+
       return $node;
     },
 

@@ -21,20 +21,20 @@
 }
 
 .profile {
-  width: 57px;
-  height: 57px;
-  border-radius: 57px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50px;
   position: absolute;
   top: 50%;
   left: 50%;
-  margin: -27px 0 0 -27px;
+  margin: -25px 0 0 -25px;
   overflow: hidden;
   /*border: 1px solid #006567;*/
   box-shadow: 0 0 8px 1px rgba(0, 101 , 103, 0.7);
   opacity: 0.3;
 }
 .profile img {
-    max-width: 57px;
+    margin: 0 0 0 -4px;
 }
 
 .profile.me {
@@ -46,6 +46,7 @@
 }
 .profile.me img {
   max-width: 140px;
+  margin: 0;
 }
 
 .profile.active {
