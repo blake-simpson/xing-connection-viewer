@@ -12,8 +12,9 @@ App = (function() {
   return {
     userID: "16184731_41d6ee",
     data: {},
+    nodes: {},
     shares: [],
-    active: false,
+    chosen: false,
 
     init: function () {
       $.getJSON(
@@ -22,69 +23,108 @@ App = (function() {
       );
     },
 
+    /**
+     * Accept the loaded JSON and setup the inital app state
+     */
     applyData: function ( json ) {
       this.data = json;
 
+      // Add the center circle
       this._addContact( {
         name: this.data.me.display_name,
         image: this.data.me.photo_urls.large
       }, "me" );
 
       this._collectShares();
-      this.circle();
+      this.cacheNodes();
       this.bindEvents();
+      this.circle();
     },
 
-    bindEvents: function () {
-      var $name = $( ".name" ),
-        $info = $( ".info" );
+    /**
+     * Grab static nodes for future use
+     */
+    cacheNodes: function () {
+      this.nodes = {
+        $name: $( ".name" ),
+        $info: $( ".info" )
+      }
+    },
 
-      $( "body" ).delegate( ".profile:not(.me):not(.locked)", "mouseover", function () {
+    /**
+     * Delegate events for interacting with the circle
+     */
+    bindEvents: function () {
+      var notMeSelector = ".profile:not(.me)",
+        notLockedSelector = notMeSelector + ":not(.locked)";
+
+      // On Hover over, highlight the circle and show the name
+      $( "body" ).delegate( notLockedSelector, "mouseover", function () {
         var $profile = $( this ),
           data = $profile.data( "profile" );
 
         $profile.addClass( "active" );
-
-        if ( !App.active ) {
-          $name.text( data.display_name );
-        }
+        App.updateName( data.display_name );
       });
 
-      $( "body" ).delegate( ".profile:not(.me):not(.locked)", "mouseout", function () {
+      // When leaving the circle, return state to normal
+      $( "body" ).delegate( notLockedSelector, "mouseout", function () {
         $( this ).removeClass( "active" );
-
-        if ( !App.active ) {
-          $name.text( "" );
-        }
+        App.updateName( "" );
       });
 
-      $( "body" ).delegate( ".profile:not(.me)", "click", function ( event ) {
+      // When clicking on a profile, mark it as chosen and lock shared contacts as active
+      $( "body" ).delegate( notMeSelector, "click", function ( event ) {
         var $profile = $( this ),
           data = $profile.data( "profile" ),
           shares = data.shares;
 
-        App.active = data.id;
-        $name.text( data.display_name );
-        $info.text ( shares.length + " shared contacts" );
+        App.chosen = false;
+        App.updateName( data.display_name );
+        App.updateInfo( shares.length + " shared contacts" );
+        App.chosen = data.id;
 
-        $( ".profile:not(.me)" ).removeClass( "active locked chosen" );
+        // Clean all profiles in the circle
+        $( notMeSelector ).removeClass( "active locked chosen" );
+        // Set clicked profile as "chosen"
         $profile.addClass( "active locked chosen" );
 
+        // For all shared contacts, mark as active and lock style
         shares.forEach( function( id ) {
           $( ".profile[data-id=" + id + "]" ).addClass( "active locked" );
         } );
 
+        // Prevent the event bubbling to the generic document handler
         event.stopPropagation();
       });
 
+      // Generic handler that will diable the chosen user and return to original state
       $( document ).on( "click", function () {
         $( ".profile:not(.me)" ).removeClass( "active locked chosen" );
-        $name.text( "" );
-        $info.text( "" );
-        this.active = false;
-      } );
+        this.updateName( "" );
+        this.updateInfo( "" );
+        this.chosen = false;
+      }.bind( this ) );
     },
 
+    /**
+     * Change the name text value
+     */
+    updateName: function ( val ) {
+      if ( this.chosen ) { return;}
+      this.nodes.$name.text( val );
+    },
+
+    /**
+     * Change the info text value
+     */
+    updateInfo: function ( val ) {
+      this.nodes.$info.text( val );
+    },
+
+    /**
+     * Define the angle for each profile and animate them in a circle around the "owner" profile
+     */
     circle: function () {
       var total = this.shares.length,
         distance = 200 + ( 2 * total ),
@@ -112,6 +152,9 @@ App = (function() {
       }
     },
 
+    /**
+     * Populate `shares` array with profile information and sort it
+     */
     _collectShares: function () {
       for ( var id in this.data.shares ) {
         var sharedIDs = this.data.shares[ id ],
@@ -126,10 +169,14 @@ App = (function() {
       }
 
       this.shares = this.shares.sort( function( a, b ) {
-        return a.shares.lenth > b.shares.length ? +1 : -1;
+        //return a.shares.lenth > b.shares.length ? +1 : -1;
+        return a.shares.name > a.shares.name ? +1 : -1;
       } );
     },
 
+    /**
+     * Create a profile node and append it to the DOM
+     */
     _addContact: function ( profile, styles, data ) {
       data = ( typeof data === "undefined" ) ? {} : data;
 
@@ -148,6 +195,9 @@ App = (function() {
       return $node;
     },
 
+    /**
+     * A convenience getter for profiles
+     */
     _getProfile: function ( id ) {
       return this.data.profiles[ id ];
     }
