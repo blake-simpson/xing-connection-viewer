@@ -49,7 +49,7 @@ class SharedContacts
   private
 
   def save_data
-    filename = "data/shares_#{ @data["me"]["id"] }.json"
+    filename = "data/shares.json"
     puts "Saving data to #{filename}"
     File.open(filename, "w") do |file|
       file.puts JSON.generate(@data)

@@ -10,7 +10,6 @@ $(function() {
 
 App = (function() {
   return {
-    userID: "16184731_41d6ee",
     data: {},
     nodes: {},
     shares: [],
@@ -18,7 +17,7 @@ App = (function() {
 
     init: function () {
       $.getJSON(
-        "../data/shares_" + this.userID + ".json",
+        "../data/shares.json",
         $.proxy( this.applyData, this )
       );
     },
